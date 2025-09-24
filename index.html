@@ -111,29 +111,34 @@
   </footer>
 
   <script>
-    const services = [
-      { port: 8501, url: "http://54.82.56.2:8501" },
-      { port: 8000, url: "http://54.82.56.2:8000" },
-      { port: 5000, url: "http://54.82.56.2:5000" },
-      { port: 8502, url: "http://54.82.56.2:8502" },
-      { port: 8503, url: "http://54.82.56.2:8503" }
-    ];
+    async function checkServices() {
+      const statusMap = {
+        discourse_parser: "status-8501",
+        fastapi_parser: "status-8000",
+        logic_runner: "status-5000",
+        rule_attenuation: "status-8502",
+        diagnosis_verifier: "status-8503"
+      };
 
-    function checkServices() {
-      services.forEach(service => {
-        const statusEl = document.getElementById(`status-${service.port}`);
-        const img = new Image();
-        img.onload = () => {
-          statusEl.textContent = "✅ Online";
-          statusEl.style.color = "green";
-        };
-        img.onerror = () => {
-          statusEl.textContent = "❌ Offline";
-          statusEl.style.color = "red";
-        };
-        // Try to fetch favicon or any file; add random query to avoid caching
-        img.src = service.url + "/favicon.ico?rand=" + Math.random();
-      });
+      try {
+        const response = await fetch("http://54.82.56.2:9000/health");
+        const data = await response.json();
+
+        for (const [name, status] of Object.entries(data)) {
+          const el = document.getElementById(statusMap[name]);
+          if (!el) continue;
+
+          if (status === "online") {
+            el.textContent = "✅ Online";
+            el.style.color = "green";
+          } else {
+            el.textContent = "❌ Offline";
+            el.style.color = "red";
+          }
+        }
+      } catch (err) {
+        console.error("Health check failed:", err);
+      }
     }
 
     checkServices();
