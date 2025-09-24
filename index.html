@@ -118,23 +118,22 @@
       { port: 8502, url: "http://54.82.56.2:8500" },
       { port: 8503, url: "http://54.82.56.2:8503" }
     ];
-    async function checkServices() {
-      for (let service of services) {
-        const statusEl = document.getElementById(`status-${service.port}`);
-        try {
-          const controller = new AbortController();
-          const timeout = setTimeout(() => controller.abort(), 3000); // 3s timeout
-          await fetch(service.url, { signal: controller.signal, mode: "no-cors" });
-          clearTimeout(timeout);
-          statusEl.textContent = "✅ Online";
-          statusEl.style.color = "green";
-        } catch (err) {
-          statusEl.textContent = "❌ Offline";
-          statusEl.style.color = "red";
-        }
-      }
-    }
-
+    function checkServices() {
+    services.forEach(service => {
+      const statusEl = document.getElementById(`status-${service.port}`);
+      const img = new Image();
+      img.onload = () => {
+        statusEl.textContent = "✅ Online";
+        statusEl.style.color = "green";
+      };
+      img.onerror = () => {
+        statusEl.textContent = "❌ Offline";
+        statusEl.style.color = "red";
+      };
+      // Add cache-buster so browser doesn’t reuse old result
+      img.src = service.url + "/favicon.ico?rand=" + Math.random();
+    });
+  }
     checkServices();
   </script>
 </body>
