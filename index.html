@@ -50,11 +50,11 @@
     <!-- Tool 1 -->
     <div class="card">
       <div class="card-header">
-        1) Discourse Parser <span id="status-8502" class="status">⏳ Checking...</span>
+        1) Discourse Parser <span id="status-8501" class="status">⏳ Checking...</span>
       </div>
       <div class="card-body">
         <p>Needed to verify the discourse structure of generated text and other applications.</p>
-        <a href="http://54.82.56.2:8502" target="_blank" class="btn btn-primary">Open Discourse Parser</a>
+        <a href="http://54.82.56.2:8501" target="_blank" class="btn btn-primary">Open Discourse Parser</a>
       </div>
     </div>
     
@@ -72,22 +72,22 @@
     <!-- Tool 2 -->
     <div class="card">
       <div class="card-header">
-        2) Logic Program Runner <span id="status-8501" class="status">⏳ Checking...</span>
+        2) Logic Program Runner <span id="status-5000" class="status">⏳ Checking...</span>
       </div>
       <div class="card-body">
         <p>Takes an ontology and runs a set of symptoms against it to derive conclusions.</p>
-        <a href="http://54.82.56.2:8501" target="_blank" class="btn btn-primary">Open Logic Program Runner</a>
+        <a href="http://54.82.56.2:5000" target="_blank" class="btn btn-primary">Open Logic Program Runner</a>
       </div>
     </div>
     
     <!-- Tool 3 -->
     <div class="card">
       <div class="card-header">
-        3) Rule Attenuation Engine <span id="status-8500" class="status">⏳ Checking...</span>
+        3) Rule Attenuation Engine <span id="status-8502" class="status">⏳ Checking...</span>
       </div>
       <div class="card-body">
         <p>Adjusts a rule clause for a given set of symptoms to diagnose a particular disease.</p>
-        <a href="http://54.82.56.2:8500" target="_blank" class="btn btn-primary">Open Rule Attenuation Engine</a>
+        <a href="http://54.82.56.2:8502" target="_blank" class="btn btn-primary">Open Rule Attenuation Engine</a>
       </div>
     </div>
     
@@ -112,28 +112,30 @@
 
   <script>
     const services = [
-      { port: 8502, url: "http://54.82.56.2:8502" },
-      { port: 8000, url: "http://54.82.56.2:8000" },
       { port: 8501, url: "http://54.82.56.2:8501" },
-      { port: 8502, url: "http://54.82.56.2:8500" },
+      { port: 8000, url: "http://54.82.56.2:8000" },
+      { port: 5000, url: "http://54.82.56.2:5000" },
+      { port: 8502, url: "http://54.82.56.2:8502" },
       { port: 8503, url: "http://54.82.56.2:8503" }
     ];
+
     function checkServices() {
-    services.forEach(service => {
-      const statusEl = document.getElementById(`status-${service.port}`);
-      const img = new Image();
-      img.onload = () => {
-        statusEl.textContent = "✅ Online";
-        statusEl.style.color = "green";
-      };
-      img.onerror = () => {
-        statusEl.textContent = "❌ Offline";
-        statusEl.style.color = "red";
-      };
-      // Add cache-buster so browser doesn’t reuse old result
-      img.src = service.url + "/favicon.ico?rand=" + Math.random();
-    });
-  }
+      services.forEach(service => {
+        const statusEl = document.getElementById(`status-${service.port}`);
+        const img = new Image();
+        img.onload = () => {
+          statusEl.textContent = "✅ Online";
+          statusEl.style.color = "green";
+        };
+        img.onerror = () => {
+          statusEl.textContent = "❌ Offline";
+          statusEl.style.color = "red";
+        };
+        // Try to fetch favicon or any file; add random query to avoid caching
+        img.src = service.url + "/favicon.ico?rand=" + Math.random();
+      });
+    }
+
     checkServices();
   </script>
 </body>
