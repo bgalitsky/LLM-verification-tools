@@ -8,9 +8,13 @@
     body {
       background-color: #f8f9fa;
       padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
     }
     .container {
-      max-width: 800px;
+      max-width: 900px;
+      flex-grow: 1;
     }
     .card {
       margin-bottom: 1rem;
@@ -21,6 +25,20 @@
       font-weight: bold;
       font-size: 1.2rem;
       background-color: #e9ecef;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .status {
+      font-size: 1rem;
+    }
+    footer {
+      margin-top: 2rem;
+      text-align: center;
+      font-size: 1rem;
+      padding: 1rem;
+      background-color: #e9ecef;
+      border-radius: 8px;
     }
   </style>
 </head>
@@ -31,16 +49,20 @@
     
     <!-- Tool 1 -->
     <div class="card">
-      <div class="card-header">1) Discourse Parser</div>
+      <div class="card-header">
+        1) Discourse Parser <span id="status-8502" class="status">⏳ Checking...</span>
+      </div>
       <div class="card-body">
         <p>Needed to verify the discourse structure of generated text and other applications.</p>
-        <a href="http://54.82.56.2:8501" target="_blank" class="btn btn-primary">Open Discourse Parser</a>
+        <a href="http://54.82.56.2:8502" target="_blank" class="btn btn-primary">Open Discourse Parser</a>
       </div>
     </div>
     
     <!-- Tool 1' -->
     <div class="card">
-      <div class="card-header">1') FastAPI to Discourse Parser</div>
+      <div class="card-header">
+        1') FastAPI to Discourse Parser <span id="status-8000" class="status">⏳ Checking...</span>
+      </div>
       <div class="card-body">
         <p>Provides an API interface to the discourse parser for integration in pipelines.</p>
         <a href="http://54.82.56.2:8000" target="_blank" class="btn btn-primary">Open FastAPI Parser</a>
@@ -49,30 +71,71 @@
     
     <!-- Tool 2 -->
     <div class="card">
-      <div class="card-header">2) Logic Program Runner</div>
+      <div class="card-header">
+        2) Logic Program Runner <span id="status-8501" class="status">⏳ Checking...</span>
+      </div>
       <div class="card-body">
         <p>Takes an ontology and runs a set of symptoms against it to derive conclusions.</p>
-        <a href="http://54.82.56.2:5000" target="_blank" class="btn btn-primary">Open Logic Program Runner</a>
+        <a href="http://54.82.56.2:8501" target="_blank" class="btn btn-primary">Open Logic Program Runner</a>
       </div>
     </div>
     
     <!-- Tool 3 -->
     <div class="card">
-      <div class="card-header">3) Rule Attenuation Engine</div>
+      <div class="card-header">
+        3) Rule Attenuation Engine <span id="status-8500" class="status">⏳ Checking...</span>
+      </div>
       <div class="card-body">
         <p>Adjusts a rule clause for a given set of symptoms to diagnose a particular disease.</p>
-        <a href="http://54.82.56.2:8502" target="_blank" class="btn btn-primary">Open Rule Attenuation Engine</a>
+        <a href="http://54.82.56.2:8500" target="_blank" class="btn btn-primary">Open Rule Attenuation Engine</a>
       </div>
     </div>
     
     <!-- Tool 4 -->
     <div class="card">
-      <div class="card-header">4) Diagnosis-Making Verifier</div>
+      <div class="card-header">
+        4) Diagnosis-Making Verifier <span id="status-8503" class="status">⏳ Checking...</span>
+      </div>
       <div class="card-body">
         <p>Verifies diagnosis-making by an LLM using logic programming and discourse analysis.</p>
         <a href="http://54.82.56.2:8503" target="_blank" class="btn btn-primary">Open Diagnosis Verifier</a>
       </div>
     </div>
   </div>
+
+  <!-- Footer -->
+  <footer>
+    📄 <a href="https://1drv.ms/w/c/02a008d38e197356/EdpOucr97VBGkPOdrBXjv90BRcvyqPZNShVPZDys4B8nNg?e=L2XE3a" target="_blank">
+      Project Notes (OneDrive link)
+    </a>
+  </footer>
+
+  <script>
+    const services = [
+      { port: 8502, url: "http://54.82.56.2:8502" },
+      { port: 8000, url: "http://54.82.56.2:8000" },
+      { port: 8501, url: "http://54.82.56.2:8501" },
+      { port: 8502, url: "http://54.82.56.2:8500" },
+      { port: 8503, url: "http://54.82.56.2:8503" }
+    ];
+    async function checkServices() {
+      for (let service of services) {
+        const statusEl = document.getElementById(`status-${service.port}`);
+        try {
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 3000); // 3s timeout
+          await fetch(service.url, { signal: controller.signal, mode: "no-cors" });
+          clearTimeout(timeout);
+          statusEl.textContent = "✅ Online";
+          statusEl.style.color = "green";
+        } catch (err) {
+          statusEl.textContent = "❌ Offline";
+          statusEl.style.color = "red";
+        }
+      }
+    }
+
+    checkServices();
+  </script>
 </body>
 </html>
