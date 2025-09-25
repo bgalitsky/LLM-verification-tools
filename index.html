@@ -72,18 +72,18 @@
     <!-- Tool 2 -->
     <div class="card">
       <div class="card-header">
-        2) Logic Program Runner <span id="status-5000" class="status">⏳ Checking...</span>
+        2) Logic Program Runner <span id="status-8500" class="status">⏳ Checking...</span>
       </div>
       <div class="card-body">
         <p>Takes an ontology and runs a set of symptoms against it to derive conclusions.</p>
-        <a href="http://54.82.56.2:5000" target="_blank" class="btn btn-primary">Open Logic Program Runner</a>
+        <a href="http://54.82.56.2:8500" target="_blank" class="btn btn-primary">Open Logic Program Runner</a>
       </div>
     </div>
     
     <!-- Tool 3 -->
     <div class="card">
       <div class="card-header">
-        3) Interactive Disease Reasoner with Rule Attenuation <span id="status-8504" class="status">⏳ Checking...</span>
+        3) Rule Attenuation Engine <span id="status-8504" class="status">⏳ Checking...</span>
       </div>
       <div class="card-body">
         <p>Adjusts a rule clause for a given set of symptoms to diagnose a particular disease.</p>
@@ -101,6 +101,80 @@
         <a href="http://54.82.56.2:8503" target="_blank" class="btn btn-primary">Open Diagnosis Verifier</a>
       </div>
     </div>
+
+    <!-- Explanation Section -->
+    <div class="mt-5">
+      <h2>Why These Tools Are Needed for Verifying LLM Answers</h2>
+      <p class="lead">Large Language Models (LLMs) can generate fluent but sometimes <strong>hallucinated</strong> or <strong>logically inconsistent</strong> answers. 
+      Each tool in this project addresses a different failure mode and contributes to making LLM outputs trustworthy.</p>
+
+      <div class="mb-4">
+        <h4>1. Discourse Parser</h4>
+        <p>Checks the <em>form</em> of reasoning by extracting rhetorical relations such as <code>evidence → claim</code>, 
+        <code>cause → effect</code>, or <code>contrast</code>. It ensures the explanation flow is coherent.</p>
+      </div>
+
+      <div class="mb-4">
+        <h4>1') FastAPI to Discourse Parser</h4>
+        <p>Exposes the parser as a service endpoint so other tools can automatically call discourse verification 
+        inside a pipeline.</p>
+      </div>
+
+      <div class="mb-4">
+        <h4>2. Logic Program Runner</h4>
+        <p>Checks the <em>content</em> of an LLM answer against a formal ontology. If the claims do not unify 
+        with the rules (e.g., medical knowledge base), they are flagged as inconsistent.</p>
+      </div>
+
+      <div class="mb-4">
+        <h4>3. Rule Attenuation Engine</h4>
+        <p>Introduces <em>flexibility</em> by relaxing strict rules step by step. This allows us to test whether 
+        a diagnosis is still plausible when some conditions are missing or weakened.</p>
+      </div>
+
+      <div class="mb-4">
+        <h4>4. Diagnosis-Making Verifier</h4>
+        <p>Integrates discourse parsing and logic checks into a final <strong>truth meter</strong> for LLM answers. 
+        If discourse and ontology align → ✅ verified. Otherwise → ❌ unreliable.</p>
+      </div>
+
+      <h3 class="mt-5">Flow of Verification</h3>
+      <p>The tools form a pipeline, moving from surface-level discourse to deep logical consistency checks:</p>
+
+      <!-- Flow Diagram -->
+      <div class="text-center">
+        <svg width="800" height="350" xmlns="http://www.w3.org/2000/svg">
+          <!-- Nodes -->
+          <rect x="50" y="40" width="200" height="60" rx="12" ry="12" fill="#e9ecef" stroke="#333"/>
+          <text x="150" y="75" font-size="14" text-anchor="middle">Discourse Parser</text>
+
+          <rect x="300" y="40" width="200" height="60" rx="12" ry="12" fill="#e9ecef" stroke="#333"/>
+          <text x="400" y="75" font-size="14" text-anchor="middle">FastAPI Service</text>
+
+          <rect x="550" y="40" width="200" height="60" rx="12" ry="12" fill="#e9ecef" stroke="#333"/>
+          <text x="650" y="75" font-size="14" text-anchor="middle">Logic Program Runner</text>
+
+          <rect x="180" y="180" width="200" height="60" rx="12" ry="12" fill="#e9ecef" stroke="#333"/>
+          <text x="280" y="215" font-size="14" text-anchor="middle">Rule Attenuation Engine</text>
+
+          <rect x="430" y="280" width="220" height="60" rx="12" ry="12" fill="#d1e7dd" stroke="#333"/>
+          <text x="540" y="315" font-size="14" text-anchor="middle">Diagnosis-Making Verifier</text>
+
+          <!-- Arrows -->
+          <line x1="250" y1="70" x2="300" y2="70" stroke="black" marker-end="url(#arrow)" />
+          <line x1="500" y1="70" x2="550" y2="70" stroke="black" marker-end="url(#arrow)" />
+          <line x1="650" y1="100" x2="280" y2="180" stroke="black" marker-end="url(#arrow)" />
+          <line x1="280" y1="240" x2="540" y2="280" stroke="black" marker-end="url(#arrow)" />
+
+          <!-- Arrow Marker -->
+          <defs>
+            <marker id="arrow" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L6,3 z" fill="#333"/>
+            </marker>
+          </defs>
+        </svg>
+      </div>
+    </div>
   </div>
 
   <!-- Footer -->
@@ -110,38 +184,13 @@
     </a>
   </footer>
 
+  <!-- Status check (placeholder, waiting for healthcheck API/HTTPS setup) -->
   <script>
-    async function checkServices() {
-      const statusMap = {
-        discourse_parser: "status-8501",
-        fastapi_parser: "status-8000",
-        logic_runner: "status-5000",
-        rule_attenuation: "status-8504",
-        diagnosis_verifier: "status-8503"
-      };
-
-      try {
-        const response = await fetch("http://54.82.56.2:9000/health");
-        const data = await response.json();
-
-        for (const [name, status] of Object.entries(data)) {
-          const el = document.getElementById(statusMap[name]);
-          if (!el) continue;
-
-          if (status === "online") {
-            el.textContent = "✅ Online";
-            el.style.color = "green";
-          } else {
-            el.textContent = "❌ Offline";
-            el.style.color = "red";
-          }
-        }
-      } catch (err) {
-        console.error("Health check failed:", err);
-      }
-    }
-
-    checkServices();
+    const statuses = ["status-8501","status-8000","status-8500","status-8504","status-8503"];
+    statuses.forEach(id=>{
+      document.getElementById(id).textContent = "ℹ️ Click link to test (browser blocks auto-check)";
+      document.getElementById(id).style.color = "gray";
+    });
   </script>
 </body>
 </html>
